@@ -479,7 +479,6 @@ export function SettingsScreen({ navigation }: Props) {
                 <ThemedText size="base" weight="medium">Scribo</ThemedText>
                 <ThemedText size="xs" variant="muted" style={{ marginTop: 2 }}>Version {Constants.expoConfig?.version ?? '1.0.0'}</ThemedText>
               </View>
-              <ThemedText size="sm" variant="muted">v1.0</ThemedText>
             </View>
           </View>
 
