@@ -109,6 +109,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
   const [addUnit, setAddUnit] = useState<Unit>('nos');
   const [addNotes, setAddNotes] = useState('');
   const [addExpanded, setAddExpanded] = useState(false);
+  const flatListRef = useRef<any>(null);
   const nameRef = useRef<TextInput>(null);
   const qtyRef = useRef<TextInput>(null);
   const notesRef = useRef<TextInput>(null);
@@ -154,6 +155,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
     setAddUnit('nos');
     setMode('none');
     Keyboard.dismiss();
+    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 150);
   };
 
   const displayItems = useMemo(() => {
@@ -274,6 +276,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
 
           {/* Stock entry list */}
           <FlatList
+            ref={flatListRef}
             data={displayItems}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
