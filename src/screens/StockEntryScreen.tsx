@@ -213,7 +213,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
   return (
     <ThemedView style={{ flex: 1 }}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.background} />
-      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 0}>
           {/* Header */}
           <View
@@ -547,7 +547,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
               <View
                 style={{
                   paddingHorizontal: 16,
-                  paddingBottom: Platform.OS === 'ios' ? 28 : 16,
+                  paddingBottom: 12,
                 }}
               >
                 <TouchableOpacity

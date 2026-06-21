@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   Keyboard,
+  KeyboardAvoidingView as RNKeyboardAvoidingView,
   Modal,
   Platform,
   ScrollView,
@@ -12,7 +13,7 @@ import {
 } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ThemedText } from '../components/ui/ThemedText';
@@ -37,6 +38,7 @@ function formatTime(ts: number): string {
 
 export function ShoppingListDetailScreen({ navigation, route }: Props) {
   const { theme, isDark } = useAppTheme();
+  const { bottom: bottomInset } = useSafeAreaInsets();
   const { generatedLists, toggleShoppingItem, updateShoppingItemQty, addManualShoppingItem } = useApp();
 
   const { listId } = route.params;
@@ -169,7 +171,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
   return (
     <ThemedView style={{ flex: 1 }}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.background} />
-      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 0}>
           {/* Header */}
           <View
@@ -389,7 +391,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
                 flexDirection: 'row',
                 paddingHorizontal: 16,
                 paddingTop: 10,
-                paddingBottom: Platform.OS === 'ios' ? 28 : 14,
+                paddingBottom: 8,
                 gap: 8,
               }}
             >
@@ -516,12 +518,13 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
         animationType="slide"
         onRequestClose={() => setPartialBuyItem(null)}
       >
-        <TouchableOpacity
-          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
-          activeOpacity={1}
-          onPress={() => setPartialBuyItem(null)}
-        />
-        <View style={{ backgroundColor: theme.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderTopWidth: 1, borderTopColor: theme.border, padding: 20, gap: 14 }}>
+        <RNKeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+          <TouchableOpacity
+            style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
+            activeOpacity={1}
+            onPress={() => setPartialBuyItem(null)}
+          />
+          <View style={{ backgroundColor: theme.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderTopWidth: 1, borderTopColor: theme.border, paddingTop: 20, paddingHorizontal: 20, paddingBottom: Math.max(20, bottomInset + 8), gap: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ flex: 1 }}>
               <ThemedText size="base" weight="bold">{partialBuyItem?.name}</ThemedText>
@@ -577,7 +580,8 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
               Got it
             </ThemedText>
           </TouchableOpacity>
-        </View>
+          </View>
+        </RNKeyboardAvoidingView>
       </Modal>
     </ThemedView>
   );
