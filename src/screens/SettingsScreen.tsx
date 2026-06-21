@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Image, View, TouchableOpacity, ScrollView, StatusBar, Switch } from 'react-native';
+import { Alert, Image, Linking, Modal, View, TouchableOpacity, ScrollView, StatusBar, Switch } from 'react-native';
 import Constants from 'expo-constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -200,6 +200,7 @@ export function SettingsScreen({ navigation }: Props) {
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [accentPickerVisible, setAccentPickerVisible] = useState(false);
+  const [donateVisible, setDonateVisible] = useState(false);
 
   const handleExport = () => {
     Alert.alert(
@@ -480,6 +481,22 @@ export function SettingsScreen({ navigation }: Props) {
                 <ThemedText size="xs" variant="muted" style={{ marginTop: 2 }}>Version {Constants.expoConfig?.version ?? '1.0.0'}</ThemedText>
               </View>
             </View>
+            <View style={{ height: 1, backgroundColor: theme.borderMuted, marginLeft: 66 }} />
+            <SettingsRow
+              icon="github"
+              label="Source Code"
+              subtitle="github.com/itsdannydev/scribo"
+              chevron
+              onPress={() => Linking.openURL('https://github.com/itsdannydev/scribo')}
+            />
+            <View style={{ height: 1, backgroundColor: theme.borderMuted, marginLeft: 66 }} />
+            <SettingsRow
+              icon="heart"
+              label="Support Scribo"
+              subtitle="Pay via UPI"
+              chevron
+              onPress={() => setDonateVisible(true)}
+            />
           </View>
 
           {/* Neon accent preview */}
@@ -522,6 +539,53 @@ export function SettingsScreen({ navigation }: Props) {
         onConfirm={setAccentHex}
         onClose={() => setAccentPickerVisible(false)}
       />
+
+      {/* Donate modal */}
+      <Modal
+        visible={donateVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setDonateVisible(false)}
+      >
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
+          activeOpacity={1}
+          onPress={() => setDonateVisible(false)}
+        />
+        <View style={{ backgroundColor: theme.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, borderTopWidth: 1, borderTopColor: theme.border, padding: 24, gap: 16 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <ThemedText size="lg" weight="bold">Support Scribo</ThemedText>
+            <TouchableOpacity onPress={() => setDonateVisible(false)} hitSlop={8}>
+              <Feather name="x" size={20} color={theme.textMuted} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ backgroundColor: theme.card, borderRadius: 14, borderWidth: 1, borderColor: theme.border, padding: 16, gap: 8 }}>
+            <ThemedText size="sm" style={{ lineHeight: 22 }}>
+              Scribo is <ThemedText size="sm" weight="semibold">free and open source</ThemedText> — no ads, no subscriptions, no data collected.
+            </ThemedText>
+            <ThemedText size="sm" variant="muted" style={{ lineHeight: 22 }}>
+              I'm a solo developer. I build and sell other software, so I'm not entirely dependent on donations — but if Scribo saves you time or makes grocery runs less chaotic, a small contribution means a lot and helps keep side projects like this going.
+            </ThemedText>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => {
+              Linking.openURL('upi://pay?pa=scribo.dev@ptyes&pn=Scribo&tn=Support%2FDonation+from+Scribo+user');
+              setDonateVisible(false);
+            }}
+            activeOpacity={0.85}
+            style={{ backgroundColor: theme.accent, borderRadius: 14, paddingVertical: 15, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 10 }}
+          >
+            <ThemedText size="base" weight="bold" style={{ color: '#fff' }}>₹</ThemedText>
+            <ThemedText size="base" weight="bold" style={{ color: '#fff' }}>Pay via UPI</ThemedText>
+          </TouchableOpacity>
+          <ThemedText size="xs" variant="muted" style={{ textAlign: 'center' }}>
+            Opens any UPI app · scribo.dev@ptyes
+          </ThemedText>
+
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
