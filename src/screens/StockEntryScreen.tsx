@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
-  KeyboardAvoidingView,
+  Keyboard,
   Platform,
   ScrollView,
   StatusBar,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -22,7 +23,6 @@ import { useAppTheme } from '../hooks/useColorScheme';
 import { useApp } from '../context/AppContext';
 import { RootStackParamList, Unit, ALL_UNITS } from '../types';
 import { StockMap } from '../utils/generateList';
-import { getCompatibleUnits } from '../utils/units';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'StockEntry'>;
 
@@ -96,8 +96,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
   const [stockUnits, setStockUnits] = useState<Record<string, Unit>>(() => {
     const initial: Record<string, Unit> = {};
     list?.items.forEach((item) => {
-      const compatible = getCompatibleUnits(item.unit);
-      initial[item.id] = compatible[0] ?? item.unit;
+      initial[item.id] = item.unit;
     });
     return initial;
   });
@@ -154,6 +153,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
     ]);
     setAddUnit('nos');
     setMode('none');
+    Keyboard.dismiss();
   };
 
   const displayItems = useMemo(() => {
@@ -214,7 +214,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
     <ThemedView style={{ flex: 1 }}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.background} />
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" enabled={Platform.OS === 'ios'}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 0}>
           {/* Header */}
           <View
             style={{
@@ -308,7 +308,15 @@ export function StockEntryScreen({ navigation, route }: Props) {
 
             {/* Expanded add form */}
             {addExpanded && (
-              <View style={{ paddingHorizontal: 16, paddingTop: 10, gap: 8 }}>
+              <ScrollView keyboardShouldPersistTaps="always" style={{ maxHeight: 260 }} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 10, gap: 8 }}>
+                {/* Cancel row */}
+                <TouchableOpacity
+                  onPress={() => { setMode('none'); nameRef.current?.blur(); }}
+                  hitSlop={8}
+                  style={{ alignSelf: 'flex-end', padding: 4 }}
+                >
+                  <Feather name="x" size={18} color={theme.textMuted} />
+                </TouchableOpacity>
                 {/* Qty + unit chips */}
                 <View
                   style={{
@@ -335,7 +343,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
                       onSubmitEditing={() => notesRef.current?.focus()}
                     />
                   </View>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginLeft: 38 }}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always" style={{ marginLeft: 38 }}>
                     <View style={{ flexDirection: 'row', gap: 6, paddingBottom: 6 }}>
                       {ALL_UNITS.map((u) => (
                         <TouchableOpacity
@@ -408,7 +416,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
                     Add Extra Item
                   </ThemedText>
                 </TouchableOpacity>
-              </View>
+              </ScrollView>
             )}
 
             {/* Split bar row */}

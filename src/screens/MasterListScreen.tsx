@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
-  KeyboardAvoidingView,
   NativeSyntheticEvent,
   Platform,
   ScrollView,
@@ -12,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -50,6 +50,7 @@ export function MasterListScreen({ navigation, route }: Props) {
   const nameRef = useRef<TextInput>(null);
   const qtyRef = useRef<TextInput>(null);
   const notesRef = useRef<TextInput>(null);
+  const flatListRef = useRef<any>(null);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,9 +108,13 @@ export function MasterListScreen({ navigation, route }: Props) {
       unit: addUnit,
       notes: addNotes.trim() || undefined,
     });
+    setAddName('');
+    setAddQty('');
+    setAddNotes('');
     setAddUnit('nos');
-    setMode('none');
     loadHistory().then(setHistory);
+    nameRef.current?.focus();
+    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 150);
   };
 
   const displayItems = useMemo(() => {
@@ -137,7 +142,7 @@ export function MasterListScreen({ navigation, route }: Props) {
     <ThemedView style={{ flex: 1 }}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.background} />
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" enabled={Platform.OS === 'ios'}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 0}>
           {/* Header */}
           <View
             style={{
@@ -193,6 +198,7 @@ export function MasterListScreen({ navigation, route }: Props) {
 
           {/* Items */}
           <FlatList
+            ref={flatListRef}
             data={displayItems}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
@@ -246,7 +252,15 @@ export function MasterListScreen({ navigation, route }: Props) {
 
             {/* Expanded add form — above the split row */}
             {addExpanded && (
-              <View style={{ paddingHorizontal: 16, paddingTop: 10, gap: 8 }}>
+              <ScrollView keyboardShouldPersistTaps="always" style={{ maxHeight: 260 }} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 10, gap: 8 }}>
+                {/* Cancel row */}
+                <TouchableOpacity
+                  onPress={() => { setMode('none'); nameRef.current?.blur(); }}
+                  hitSlop={8}
+                  style={{ alignSelf: 'flex-end', padding: 4 }}
+                >
+                  <Feather name="x" size={18} color={theme.textMuted} />
+                </TouchableOpacity>
                 {/* Qty + unit chips */}
                 <View
                   style={{
@@ -273,7 +287,7 @@ export function MasterListScreen({ navigation, route }: Props) {
                       onSubmitEditing={() => notesRef.current?.focus()}
                     />
                   </View>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginLeft: 38 }}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always" style={{ marginLeft: 38 }}>
                     <View style={{ flexDirection: 'row', gap: 6, paddingBottom: 6 }}>
                       {ALL_UNITS.map((u) => (
                         <TouchableOpacity
@@ -346,7 +360,7 @@ export function MasterListScreen({ navigation, route }: Props) {
                     Add Item
                   </ThemedText>
                 </TouchableOpacity>
-              </View>
+              </ScrollView>
             )}
 
             {/* Split bar row */}

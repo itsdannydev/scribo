@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -10,29 +10,24 @@ import Animated, {
 import { ThemedText } from './ui/ThemedText';
 import { Checkbox } from './ui/Checkbox';
 import { useAppTheme } from '../hooks/useColorScheme';
-import { ShoppingListItem, Unit, ALL_UNITS } from '../types';
+import { ShoppingListItem } from '../types';
 import { formatQty } from '../utils/units';
 
 interface ShoppingItemRowProps {
   item: ShoppingListItem;
   onToggle: () => void;
-  onEditQty: (quantity: number, unit: Unit) => void;
+  onPartialBuy: () => void;
 }
 
 const STRIKE_DURATION = 260;
 const REORDER_DELAY = 320;
 
-export function ShoppingItemRow({ item, onToggle, onEditQty }: ShoppingItemRowProps) {
+export function ShoppingItemRow({ item, onToggle, onPartialBuy }: ShoppingItemRowProps) {
   const { theme } = useAppTheme();
-  const [editingQty, setEditingQty] = useState(false);
-  const [qtyInput, setQtyInput] = useState(String(item.quantity));
-  const [unitInput, setUnitInput] = useState<Unit>(item.unit);
 
-  // Optimistic visual state — lets strikethrough animate before the real reorder
   const [pendingCheck, setPendingCheck] = useState(false);
   const isChecked = item.checked || pendingCheck;
 
-  // Name container width measured via onLayout (percentage width unreliable in Reanimated 4)
   const [nameWidth, setNameWidth] = useState(0);
 
   const strikeProgress = useSharedValue(isChecked ? 1 : 0);
@@ -54,22 +49,14 @@ export function ShoppingItemRow({ item, onToggle, onEditQty }: ShoppingItemRowPr
 
   const handleToggle = () => {
     if (!item.checked) {
-      // Checking: animate strikethrough first, then let the list reorder
       setPendingCheck(true);
       setTimeout(() => {
         setPendingCheck(false);
         onToggle();
       }, REORDER_DELAY);
     } else {
-      // Unchecking: reorder immediately, strikethrough reverses via useEffect
       onToggle();
     }
-  };
-
-  const handleSaveQty = () => {
-    const qty = parseFloat(qtyInput);
-    if (!isNaN(qty) && qty > 0) onEditQty(qty, unitInput);
-    setEditingQty(false);
   };
 
   return (
@@ -98,7 +85,6 @@ export function ShoppingItemRow({ item, onToggle, onEditQty }: ShoppingItemRowPr
           style={{ flex: 1 }}
           onLayout={(e) => setNameWidth(e.nativeEvent.layout.width)}
         >
-          {/* Name + animated strikethrough */}
           <View>
             <ThemedText
               size="base"
@@ -132,18 +118,14 @@ export function ShoppingItemRow({ item, onToggle, onEditQty }: ShoppingItemRowPr
         {/* Quantity badge */}
         {!isChecked ? (
           <TouchableOpacity
-            onPress={() => {
-              setQtyInput(String(item.quantity));
-              setUnitInput(item.unit);
-              setEditingQty((v) => !v);
-            }}
+            onPress={onPartialBuy}
             style={{
-              backgroundColor: editingQty ? theme.accentBorder : theme.accentDim,
+              backgroundColor: theme.accentDim,
               borderRadius: 8,
               paddingHorizontal: 10,
               paddingVertical: 5,
               borderWidth: 1,
-              borderColor: editingQty ? theme.accent : theme.accentBorder,
+              borderColor: theme.accentBorder,
             }}
           >
             <ThemedText size="sm" weight="semibold" style={{ color: theme.accentText }}>
@@ -166,90 +148,6 @@ export function ShoppingItemRow({ item, onToggle, onEditQty }: ShoppingItemRowPr
           </View>
         )}
       </TouchableOpacity>
-
-      {/* Inline qty editor */}
-      {editingQty && (
-        <View
-          style={{
-            paddingHorizontal: 16,
-            paddingBottom: 12,
-            borderTopWidth: 1,
-            borderTopColor: theme.borderMuted,
-            paddingTop: 10,
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <ThemedText size="xs" variant="muted" style={{ width: 28 }}>Qty</ThemedText>
-            <TextInput
-              value={qtyInput}
-              onChangeText={setQtyInput}
-              keyboardType="decimal-pad"
-              autoFocus
-              style={{
-                flex: 1,
-                color: theme.text,
-                fontSize: 14,
-                borderBottomWidth: 1,
-                borderBottomColor: theme.accentBorder,
-                paddingVertical: 4,
-              }}
-            />
-          </View>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginLeft: 38, marginBottom: 8 }}>
-            <View style={{ flexDirection: 'row', gap: 6 }}>
-              {ALL_UNITS.map((u) => (
-                <TouchableOpacity
-                  key={u}
-                  onPress={() => setUnitInput(u)}
-                  style={{
-                    paddingHorizontal: 10,
-                    paddingVertical: 5,
-                    borderRadius: 16,
-                    borderWidth: 1,
-                    borderColor: unitInput === u ? theme.accent : theme.border,
-                    backgroundColor: unitInput === u ? theme.accentDim : 'transparent',
-                  }}
-                >
-                  <ThemedText
-                    size="xs"
-                    weight={unitInput === u ? 'semibold' : 'normal'}
-                    style={{ color: unitInput === u ? theme.accentText : theme.textMuted }}
-                  >
-                    {u}
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </ScrollView>
-
-          <View style={{ flexDirection: 'row', gap: 8, marginLeft: 38 }}>
-            <TouchableOpacity
-              onPress={() => setEditingQty(false)}
-              style={{
-                paddingHorizontal: 14,
-                paddingVertical: 6,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: theme.border,
-              }}
-            >
-              <ThemedText size="xs" variant="muted">Cancel</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleSaveQty}
-              style={{
-                paddingHorizontal: 14,
-                paddingVertical: 6,
-                borderRadius: 8,
-                backgroundColor: theme.accent,
-              }}
-            >
-              <ThemedText size="xs" weight="semibold" style={{ color: '#fff' }}>Done</ThemedText>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
     </Animated.View>
   );
 }

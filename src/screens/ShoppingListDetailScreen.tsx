@@ -1,7 +1,8 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
   FlatList,
-  KeyboardAvoidingView,
+  Keyboard,
+  Modal,
   Platform,
   ScrollView,
   StatusBar,
@@ -9,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -19,7 +21,8 @@ import { ShoppingItemRow } from '../components/ShoppingItemRow';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useAppTheme } from '../hooks/useColorScheme';
 import { useApp } from '../context/AppContext';
-import { RootStackParamList, Unit, ALL_UNITS } from '../types';
+import { RootStackParamList, ShoppingListItem, Unit, ALL_UNITS, UNIT_FAMILY, FAMILY_UNITS } from '../types';
+import { toBaseUnit, fromBaseDisplay, formatQty } from '../utils/units';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ShoppingListDetail'>;
 
@@ -35,6 +38,7 @@ function formatTime(ts: number): string {
 export function ShoppingListDetailScreen({ navigation, route }: Props) {
   const { theme, isDark } = useAppTheme();
   const { generatedLists, toggleShoppingItem, updateShoppingItemQty, addManualShoppingItem } = useApp();
+
   const { listId } = route.params;
 
   const list = generatedLists.find((l) => l.id === listId);
@@ -47,6 +51,13 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
   const nameRef = useRef<TextInput>(null);
   const qtyRef = useRef<TextInput>(null);
   const notesRef = useRef<TextInput>(null);
+  const flatListRef = useRef<any>(null);
+
+  // Partial buy
+  const [partialBuyItem, setPartialBuyItem] = useState<ShoppingListItem | null>(null);
+  const [buyQty, setBuyQty] = useState('');
+  const [buyUnit, setBuyUnit] = useState<Unit>('nos');
+  const buyInputRef = useRef<TextInput>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<TextInput>(null);
@@ -91,6 +102,41 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
     });
     setAddUnit('nos');
     setMode('none');
+    Keyboard.dismiss();
+    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 150);
+  };
+
+  const handlePartialBuy = () => {
+    if (!partialBuyItem) return;
+    const qty = parseFloat(buyQty);
+    if (isNaN(qty) || qty <= 0) return;
+
+    const family = UNIT_FAMILY[partialBuyItem.unit];
+    const originalBase = toBaseUnit(partialBuyItem.quantity, partialBuyItem.unit);
+    const boughtBase = toBaseUnit(qty, buyUnit);
+    const remainingBase = Math.max(0, originalBase - boughtBase);
+
+    const bought = family === 'count'
+      ? { quantity: qty, unit: buyUnit }
+      : fromBaseDisplay(boughtBase, family);
+
+    if (remainingBase > 0) {
+      const remaining = fromBaseDisplay(remainingBase, family);
+      updateShoppingItemQty(list!.id, partialBuyItem.id, remaining.quantity, remaining.unit);
+    } else {
+      toggleShoppingItem(list!.id, partialBuyItem.id);
+    }
+
+    addManualShoppingItem(list!.id, {
+      name: partialBuyItem.name,
+      quantity: bought.quantity,
+      unit: bought.unit,
+      notes: partialBuyItem.notes,
+      checked: true,
+    });
+
+    setPartialBuyItem(null);
+    setBuyQty('');
   };
 
   const { checked, total, sortedItems } = useMemo(() => {
@@ -124,7 +170,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
     <ThemedView style={{ flex: 1 }}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.background} />
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" enabled={Platform.OS === 'ios'}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 0}>
           {/* Header */}
           <View
             style={{
@@ -192,13 +238,18 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
 
           {/* Items */}
           <FlatList
+            ref={flatListRef}
             data={displayItems}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <ShoppingItemRow
                 item={item}
                 onToggle={() => toggleShoppingItem(list.id, item.id)}
-                onEditQty={(qty, unit) => updateShoppingItemQty(list.id, item.id, qty, unit)}
+                onPartialBuy={() => {
+                  setPartialBuyItem(item);
+                  setBuyQty('');
+                  setBuyUnit(item.unit);
+                }}
               />
             )}
             contentContainerStyle={{ paddingTop: 12, paddingBottom: 20 }}
@@ -221,7 +272,15 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
 
             {/* Expanded add form — sits above the split row */}
             {addExpanded && (
-              <View style={{ paddingHorizontal: 16, paddingTop: 10, gap: 8 }}>
+              <ScrollView keyboardShouldPersistTaps="always" style={{ maxHeight: 260 }} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 10, gap: 8 }}>
+                {/* Cancel row */}
+                <TouchableOpacity
+                  onPress={() => { setMode('none'); nameRef.current?.blur(); }}
+                  hitSlop={8}
+                  style={{ alignSelf: 'flex-end', padding: 4 }}
+                >
+                  <Feather name="x" size={18} color={theme.textMuted} />
+                </TouchableOpacity>
                 {/* Qty + unit chips */}
                 <View
                   style={{
@@ -248,7 +307,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
                       onSubmitEditing={() => notesRef.current?.focus()}
                     />
                   </View>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginLeft: 38 }}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always" style={{ marginLeft: 38 }}>
                     <View style={{ flexDirection: 'row', gap: 6, paddingBottom: 6 }}>
                       {ALL_UNITS.map((u) => (
                         <TouchableOpacity
@@ -321,7 +380,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
                     Add Item
                   </ThemedText>
                 </TouchableOpacity>
-              </View>
+              </ScrollView>
             )}
 
             {/* Split bar row */}
@@ -449,6 +508,77 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
+
+      {/* Partial buy modal */}
+      <Modal
+        visible={!!partialBuyItem}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setPartialBuyItem(null)}
+      >
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
+          activeOpacity={1}
+          onPress={() => setPartialBuyItem(null)}
+        />
+        <View style={{ backgroundColor: theme.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderTopWidth: 1, borderTopColor: theme.border, padding: 20, gap: 14 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flex: 1 }}>
+              <ThemedText size="base" weight="bold">{partialBuyItem?.name}</ThemedText>
+              <ThemedText size="xs" variant="muted">
+                Need {partialBuyItem ? formatQty(partialBuyItem.quantity, partialBuyItem.unit) : ''} · how much did you get?
+              </ThemedText>
+            </View>
+            <TouchableOpacity onPress={() => setPartialBuyItem(null)} hitSlop={8}>
+              <Feather name="x" size={20} color={theme.textMuted} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Qty input */}
+          <View style={{ backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 6 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <ThemedText size="sm" variant="muted" style={{ width: 28 }}>Qty</ThemedText>
+              <TextInput
+                ref={buyInputRef}
+                value={buyQty}
+                onChangeText={setBuyQty}
+                placeholder="0"
+                placeholderTextColor={theme.textMuted}
+                keyboardType="decimal-pad"
+                autoFocus
+                style={{ flex: 1, color: theme.text, fontSize: 15, paddingVertical: 4 }}
+                returnKeyType="done"
+                onSubmitEditing={handlePartialBuy}
+              />
+            </View>
+            {partialBuyItem && UNIT_FAMILY[partialBuyItem.unit] !== 'count' && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always" style={{ marginLeft: 38, marginBottom: 4 }}>
+                <View style={{ flexDirection: 'row', gap: 6, paddingBottom: 4 }}>
+                  {(FAMILY_UNITS[UNIT_FAMILY[partialBuyItem.unit]] ?? [partialBuyItem.unit]).map((u) => (
+                    <TouchableOpacity
+                      key={u}
+                      onPress={() => setBuyUnit(u)}
+                      style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 16, borderWidth: 1, borderColor: buyUnit === u ? theme.accent : theme.border, backgroundColor: buyUnit === u ? theme.accentDim : 'transparent' }}
+                    >
+                      <ThemedText size="xs" weight={buyUnit === u ? 'semibold' : 'normal'} style={{ color: buyUnit === u ? theme.accentText : theme.textMuted }}>{u}</ThemedText>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            )}
+          </View>
+
+          <TouchableOpacity
+            onPress={handlePartialBuy}
+            activeOpacity={0.85}
+            style={{ backgroundColor: buyQty.trim() ? theme.accent : theme.border, borderRadius: 12, paddingVertical: 14, alignItems: 'center' }}
+          >
+            <ThemedText size="base" weight="bold" style={{ color: buyQty.trim() ? '#fff' : theme.textMuted }}>
+              Got it
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }

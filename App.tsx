@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 // Third-party library (react-native-draggable-flatlist) uses deprecated InteractionManager
 // internally — suppress until the library is updated for New Architecture.
@@ -38,11 +39,13 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ErrorBoundary>
         <SafeAreaProvider>
-          <ThemeProvider>
-            <AppProvider>
-              <RootNavigator />
-            </AppProvider>
-          </ThemeProvider>
+          <KeyboardProvider statusBarTranslucent>
+            <ThemeProvider>
+              <AppProvider>
+                <RootNavigator />
+              </AppProvider>
+            </ThemeProvider>
+          </KeyboardProvider>
         </SafeAreaProvider>
       </ErrorBoundary>
     </GestureHandlerRootView>

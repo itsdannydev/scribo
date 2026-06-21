@@ -31,7 +31,7 @@ interface AppContextType {
   generateList: (masterListId: string, stock: StockMap, extraItems?: { name: string; quantity: number; unit: Unit; notes?: string }[]) => Promise<GeneratedList>;
   toggleShoppingItem: (listId: string, itemId: string) => Promise<void>;
   updateShoppingItemQty: (listId: string, itemId: string, quantity: number, unit: Unit) => Promise<void>;
-  addManualShoppingItem: (listId: string, item: { name: string; quantity: number; unit: Unit; notes?: string }) => Promise<void>;
+  addManualShoppingItem: (listId: string, item: { name: string; quantity: number; unit: Unit; notes?: string; checked?: boolean }) => Promise<void>;
   deleteGeneratedList: (id: string) => Promise<void>;
   reloadAll: () => Promise<void>;
 }
@@ -215,13 +215,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   }, [mutateGeneratedLists]);
 
-  const addManualShoppingItem = useCallback(async (listId: string, item: { name: string; quantity: number; unit: Unit; notes?: string }) => {
+  const addManualShoppingItem = useCallback(async (listId: string, item: { name: string; quantity: number; unit: Unit; notes?: string; checked?: boolean }) => {
     const newItem: ShoppingListItem = {
       id: randomUUID(),
       masterItemId: '',
       isManual: true,
-      checked: false,
-      ...item,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      notes: item.notes,
+      checked: item.checked ?? false,
     };
     await mutateGeneratedLists((prev) =>
       prev.map((l) => (l.id !== listId ? l : { ...l, items: [...l.items, newItem] }))

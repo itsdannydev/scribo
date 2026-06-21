@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "Scribo",
-    "slug": "Scribo",
-    "version": "0.0.1",
+    "slug": "scribo",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -13,16 +13,13 @@
       "package": "com.danny.scribo",
       "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#000000",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "softwareKeyboardLayoutMode": "resize"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+      "enableProguardInReleaseBuilds": true,
+      "enableShrinkResourcesInReleaseBuilds": true
     },
     "plugins": [
       "expo-font",
@@ -32,16 +29,16 @@
           "image": "./assets/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#000000"
         }
       ],
       "expo-sharing"
     ],
+    "owner": "danny.co",
     "extra": {
       "eas": {
-        "projectId": "43b1d9aa-f164-417e-9f90-c99e1a8dd4f2"
+        "projectId": "4341ee54-6777-43c0-8a4b-add7685bb437"
       }
-    },
-    "owner": "danny.co"
+    }
   }
 }
