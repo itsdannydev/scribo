@@ -116,7 +116,7 @@ export function Snackbar({
       translateY.value = withTiming(80, { duration: 180 });
       opacity.value = withTiming(0, { duration: 180 });
     }
-  }, [visible]);
+  }, [visible, onDismiss, durationMs]);
 
   const style = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],

@@ -157,7 +157,6 @@ export function AutocompleteHistoryScreen({ navigation }: Props) {
                 backgroundColor: theme.card,
                 borderWidth: 1,
                 borderColor: theme.border,
-                borderRadius: index === 0 ? 0 : 0,
                 borderTopLeftRadius: index === 0 ? 14 : 0,
                 borderTopRightRadius: index === 0 ? 14 : 0,
                 borderBottomLeftRadius: index === entries.length - 1 ? 14 : 0,

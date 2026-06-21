@@ -4,6 +4,7 @@ import {
   FlatList,
   Keyboard,
   Platform,
+  Pressable,
   ScrollView,
   StatusBar,
   TextInput,
@@ -23,6 +24,7 @@ import { useAppTheme } from '../hooks/useColorScheme';
 import { useApp } from '../context/AppContext';
 import { RootStackParamList, Unit, ALL_UNITS } from '../types';
 import { StockMap } from '../utils/generateList';
+import { formatQty } from '../utils/units';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'StockEntry'>;
 
@@ -73,7 +75,7 @@ function ExtraItemsList({
           <View style={{ flex: 1 }}>
             <ThemedText size="sm" weight="semibold">{item.name}</ThemedText>
             <ThemedText size="xs" variant="muted">
-              {item.quantity} {item.unit}{item.notes ? ` · ${item.notes}` : ''}
+              {formatQty(item.quantity, item.unit)}{item.notes ? ` · ${item.notes}` : ''}
             </ThemedText>
           </View>
           <TouchableOpacity onPress={() => onRemove(item.id)} hitSlop={8}>
@@ -140,6 +142,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
       setAddName('');
       setAddQty('');
       setAddNotes('');
+      setAddUnit('nos');
     }
     if (mode !== 'search') {
       setSearchQuery('');
@@ -321,7 +324,8 @@ export function StockEntryScreen({ navigation, route }: Props) {
                   <Feather name="x" size={18} color={theme.textMuted} />
                 </TouchableOpacity>
                 {/* Qty + unit chips */}
-                <View
+                <Pressable
+                  onPress={() => qtyRef.current?.focus()}
                   style={{
                     backgroundColor: theme.card,
                     borderWidth: 1,
@@ -372,10 +376,11 @@ export function StockEntryScreen({ navigation, route }: Props) {
                       ))}
                     </View>
                   </ScrollView>
-                </View>
+                </Pressable>
 
                 {/* Notes */}
-                <View
+                <Pressable
+                  onPress={() => notesRef.current?.focus()}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -398,7 +403,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
                     returnKeyType="done"
                     onSubmitEditing={handleAddExtra}
                   />
-                </View>
+                </Pressable>
 
                 {/* Add Extra Item button */}
                 <TouchableOpacity
@@ -434,7 +439,8 @@ export function StockEntryScreen({ navigation, route }: Props) {
             >
               {/* ── Add extra item section ── */}
               <Animated.View style={[{ overflow: 'hidden' }, addSectionStyle]}>
-                <View
+                <Pressable
+                  onPress={() => nameRef.current?.focus()}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -481,12 +487,13 @@ export function StockEntryScreen({ navigation, route }: Props) {
                       <ThemedText size="sm" variant="muted" numberOfLines={1}>Add extra item</ThemedText>
                     </TouchableOpacity>
                   )}
-                </View>
+                </Pressable>
               </Animated.View>
 
               {/* ── Search section ── */}
               <Animated.View style={[{ overflow: 'hidden' }, searchSectionStyle]}>
-                <View
+                <Pressable
+                  onPress={() => searchRef.current?.focus()}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -541,7 +548,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
                       <ThemedText size="sm" variant="muted" numberOfLines={1}>Search...</ThemedText>
                     </TouchableOpacity>
                   )}
-                </View>
+                </Pressable>
               </Animated.View>
             </View>
 

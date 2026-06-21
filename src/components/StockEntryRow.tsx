@@ -1,5 +1,5 @@
-import React from 'react';
-import { TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useRef } from 'react';
+import { Pressable, TextInput, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from './ui/ThemedText';
 import { useAppTheme } from '../hooks/useColorScheme';
 import { MasterItem, Unit } from '../types';
@@ -16,6 +16,7 @@ interface StockEntryRowProps {
 export function StockEntryRow({ item, quantity, unit, onQuantityChange, onUnitChange }: StockEntryRowProps) {
   const { theme } = useAppTheme();
   const compatibleUnits = getCompatibleUnits(item.unit);
+  const inputRef = useRef<TextInput>(null);
 
   return (
     <View
@@ -38,7 +39,8 @@ export function StockEntryRow({ item, quantity, unit, onQuantityChange, onUnitCh
       {/* I have: input + unit */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <ThemedText size="sm" variant="muted">I have</ThemedText>
-        <View
+        <Pressable
+          onPress={() => inputRef.current?.focus()}
           style={{
             flex: 1,
             backgroundColor: theme.background,
@@ -50,6 +52,7 @@ export function StockEntryRow({ item, quantity, unit, onQuantityChange, onUnitCh
           }}
         >
           <TextInput
+            ref={inputRef}
             value={quantity}
             onChangeText={onQuantityChange}
             placeholder={String(item.quantity)}
@@ -57,7 +60,7 @@ export function StockEntryRow({ item, quantity, unit, onQuantityChange, onUnitCh
             keyboardType="decimal-pad"
             style={{ color: theme.text, fontSize: 14, padding: 0 }}
           />
-        </View>
+        </Pressable>
 
         {/* Unit chips — only compatible units */}
         <View style={{ flexDirection: 'row', gap: 6 }}>

@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView as RNKeyboardAvoidingView,
   Modal,
   Platform,
+  Pressable,
   ScrollView,
   StatusBar,
   TextInput,
@@ -87,6 +88,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
       setAddName('');
       setAddQty('');
       setAddNotes('');
+      setAddUnit('nos');
     }
     if (mode !== 'search') {
       setSearchQuery('');
@@ -284,7 +286,8 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
                   <Feather name="x" size={18} color={theme.textMuted} />
                 </TouchableOpacity>
                 {/* Qty + unit chips */}
-                <View
+                <Pressable
+                  onPress={() => qtyRef.current?.focus()}
                   style={{
                     backgroundColor: theme.card,
                     borderWidth: 1,
@@ -335,10 +338,11 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
                       ))}
                     </View>
                   </ScrollView>
-                </View>
+                </Pressable>
 
                 {/* Notes */}
-                <View
+                <Pressable
+                  onPress={() => notesRef.current?.focus()}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -361,7 +365,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
                     returnKeyType="done"
                     onSubmitEditing={handleAddManual}
                   />
-                </View>
+                </Pressable>
 
                 {/* Add Item button */}
                 <TouchableOpacity
@@ -397,7 +401,8 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
             >
               {/* ── Add section ── */}
               <Animated.View style={[{ overflow: 'hidden' }, addSectionStyle]}>
-                <View
+                <Pressable
+                  onPress={() => nameRef.current?.focus()}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -444,12 +449,13 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
                       <ThemedText size="sm" variant="muted" numberOfLines={1}>Add extra item</ThemedText>
                     </TouchableOpacity>
                   )}
-                </View>
+                </Pressable>
               </Animated.View>
 
               {/* ── Search section ── */}
               <Animated.View style={[{ overflow: 'hidden' }, searchSectionStyle]}>
-                <View
+                <Pressable
+                  onPress={() => searchRef.current?.focus()}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -504,7 +510,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
                       <ThemedText size="sm" variant="muted" numberOfLines={1}>Search...</ThemedText>
                     </TouchableOpacity>
                   )}
-                </View>
+                </Pressable>
               </Animated.View>
             </View>
           </View>
@@ -538,7 +544,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
           </View>
 
           {/* Qty input */}
-          <View style={{ backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 6 }}>
+          <Pressable onPress={() => buyInputRef.current?.focus()} style={{ backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <ThemedText size="sm" variant="muted" style={{ width: 28 }}>Qty</ThemedText>
               <TextInput
@@ -569,7 +575,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
                 </View>
               </ScrollView>
             )}
-          </View>
+          </Pressable>
 
           <TouchableOpacity
             onPress={handlePartialBuy}

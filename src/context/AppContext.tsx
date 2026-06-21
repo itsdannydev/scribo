@@ -60,7 +60,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setMasterLists(sortedMl);
       setGeneratedLists(sortedGl);
       setIsLoading(false);
-    });
+    }).catch(() => setIsLoading(false));
   }, []);
 
   // ── Master list mutations ──────────────────────────────────────────────────

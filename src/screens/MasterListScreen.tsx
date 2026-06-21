@@ -3,6 +3,7 @@ import {
   FlatList,
   NativeSyntheticEvent,
   Platform,
+  Pressable,
   ScrollView,
   StatusBar,
   Text,
@@ -93,6 +94,7 @@ export function MasterListScreen({ navigation, route }: Props) {
       setAddName('');
       setAddQty('');
       setAddNotes('');
+      setAddUnit('nos');
     }
     if (mode !== 'search') {
       setSearchQuery('');
@@ -262,7 +264,8 @@ export function MasterListScreen({ navigation, route }: Props) {
                   <Feather name="x" size={18} color={theme.textMuted} />
                 </TouchableOpacity>
                 {/* Qty + unit chips */}
-                <View
+                <Pressable
+                  onPress={() => qtyRef.current?.focus()}
                   style={{
                     backgroundColor: theme.card,
                     borderWidth: 1,
@@ -313,10 +316,11 @@ export function MasterListScreen({ navigation, route }: Props) {
                       ))}
                     </View>
                   </ScrollView>
-                </View>
+                </Pressable>
 
                 {/* Notes */}
-                <View
+                <Pressable
+                  onPress={() => notesRef.current?.focus()}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -339,7 +343,7 @@ export function MasterListScreen({ navigation, route }: Props) {
                     returnKeyType="done"
                     onSubmitEditing={handleAdd}
                   />
-                </View>
+                </Pressable>
 
                 {/* Add Item button */}
                 <TouchableOpacity
@@ -375,7 +379,8 @@ export function MasterListScreen({ navigation, route }: Props) {
             >
               {/* ── Add section ── */}
               <Animated.View style={[{ overflow: 'hidden' }, addSectionStyle]}>
-                <View
+                <Pressable
+                  onPress={() => nameRef.current?.focus()}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -459,12 +464,13 @@ export function MasterListScreen({ navigation, route }: Props) {
                       <ThemedText size="sm" variant="muted" numberOfLines={1}>Add item</ThemedText>
                     </TouchableOpacity>
                   )}
-                </View>
+                </Pressable>
               </Animated.View>
 
               {/* ── Search section ── */}
               <Animated.View style={[{ overflow: 'hidden' }, searchSectionStyle]}>
-                <View
+                <Pressable
+                  onPress={() => searchRef.current?.focus()}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -519,7 +525,7 @@ export function MasterListScreen({ navigation, route }: Props) {
                       <ThemedText size="sm" variant="muted" numberOfLines={1}>Search...</ThemedText>
                     </TouchableOpacity>
                   )}
-                </View>
+                </Pressable>
               </Animated.View>
             </View>
           </View>
