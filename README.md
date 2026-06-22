@@ -1,5 +1,7 @@
 # Scribo
 
+![Scribo Banner](assets/banner.webp)
+
 A personal shopping list app built with Expo and React Native. Scribo lets you maintain a master list of everything you regularly stock, track what you currently have, generate a shopping list for what's missing, and check off items while you shop.
 
 ## Features
