@@ -64,6 +64,7 @@ export interface AppSettings {
 }
 
 export type RootStackParamList = {
+  Onboarding: undefined;
   Home: { snackMessage?: string; snackListId?: string } | undefined;
   MasterList: { masterListId: string };
   StockEntry: { masterListId: string };

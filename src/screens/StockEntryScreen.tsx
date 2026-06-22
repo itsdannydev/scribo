@@ -25,6 +25,8 @@ import { useApp } from '../context/AppContext';
 import { RootStackParamList, Unit, ALL_UNITS } from '../types';
 import { StockMap } from '../utils/generateList';
 import { formatQty } from '../utils/units';
+import { hapticSuccess } from '../utils/haptics';
+import { useSettings } from '../hooks/useSettings';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'StockEntry'>;
 
@@ -89,6 +91,7 @@ function ExtraItemsList({
 
 export function StockEntryScreen({ navigation, route }: Props) {
   const { theme, isDark } = useAppTheme();
+  const { settings } = useSettings();
   const { masterLists, generateList } = useApp();
   const { masterListId } = route.params;
 
@@ -199,6 +202,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
         return;
       }
 
+      hapticSuccess(settings.haptics ?? true);
       navigation.navigate('Home', { snackMessage: 'Shopping list generated', snackListId: generated.id });
     } catch {
       Alert.alert('Error', 'Could not generate list. Please try again.');

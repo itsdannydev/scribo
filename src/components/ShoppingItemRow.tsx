@@ -12,17 +12,19 @@ import { Checkbox } from './ui/Checkbox';
 import { useAppTheme } from '../hooks/useColorScheme';
 import { ShoppingListItem } from '../types';
 import { formatQty } from '../utils/units';
+import { hapticSuccess } from '../utils/haptics';
 
 interface ShoppingItemRowProps {
   item: ShoppingListItem;
   onToggle: () => void;
   onPartialBuy: () => void;
+  hapticsEnabled?: boolean;
 }
 
 const STRIKE_DURATION = 260;
 const REORDER_DELAY = 320;
 
-export function ShoppingItemRow({ item, onToggle, onPartialBuy }: ShoppingItemRowProps) {
+export function ShoppingItemRow({ item, onToggle, onPartialBuy, hapticsEnabled = true }: ShoppingItemRowProps) {
   const { theme } = useAppTheme();
 
   const [pendingCheck, setPendingCheck] = useState(false);
@@ -49,6 +51,7 @@ export function ShoppingItemRow({ item, onToggle, onPartialBuy }: ShoppingItemRo
 
   const handleToggle = () => {
     if (!item.checked) {
+      hapticSuccess(hapticsEnabled);
       setPendingCheck(true);
       setTimeout(() => {
         setPendingCheck(false);

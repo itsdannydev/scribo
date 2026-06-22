@@ -25,6 +25,8 @@ import { useAppTheme } from '../hooks/useColorScheme';
 import { useApp } from '../context/AppContext';
 import { RootStackParamList, ShoppingListItem, Unit, ALL_UNITS, UNIT_FAMILY, FAMILY_UNITS } from '../types';
 import { toBaseUnit, fromBaseDisplay, formatQty } from '../utils/units';
+import { hapticLight, hapticSuccess } from '../utils/haptics';
+import { useSettings } from '../hooks/useSettings';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ShoppingListDetail'>;
 
@@ -41,6 +43,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
   const { theme, isDark } = useAppTheme();
   const { bottom: bottomInset } = useSafeAreaInsets();
   const { generatedLists, toggleShoppingItem, updateShoppingItemQty, addManualShoppingItem } = useApp();
+  const { settings } = useSettings();
 
   const { listId } = route.params;
 
@@ -104,6 +107,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
       unit: addUnit,
       notes: addNotes.trim() || undefined,
     });
+    hapticLight(settings.haptics ?? true);
     setAddUnit('nos');
     setMode('none');
     Keyboard.dismiss();
@@ -139,6 +143,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
       checked: true,
     });
 
+    hapticSuccess(settings.haptics ?? true);
     setPartialBuyItem(null);
     setBuyQty('');
   };
@@ -248,6 +253,7 @@ export function ShoppingListDetailScreen({ navigation, route }: Props) {
             renderItem={({ item }) => (
               <ShoppingItemRow
                 item={item}
+                hapticsEnabled={settings.haptics ?? true}
                 onToggle={() => toggleShoppingItem(list.id, item.id)}
                 onPartialBuy={() => {
                   setPartialBuyItem(item);

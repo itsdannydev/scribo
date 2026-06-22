@@ -26,11 +26,14 @@ import { useAppTheme } from '../hooks/useColorScheme';
 import { useApp } from '../context/AppContext';
 import { loadHistory } from '../storage/history';
 import { RootStackParamList, MasterItem, Unit, ALL_UNITS, ItemHistoryEntry } from '../types';
+import { hapticLight } from '../utils/haptics';
+import { useSettings } from '../hooks/useSettings';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MasterList'>;
 
 export function MasterListScreen({ navigation, route }: Props) {
   const { theme, isDark } = useAppTheme();
+  const { settings } = useSettings();
   const { masterLists, addMasterItem, updateMasterItem, deleteMasterItem, renameMasterList, deleteMasterList } = useApp();
   const { masterListId } = route.params;
 
@@ -110,6 +113,7 @@ export function MasterListScreen({ navigation, route }: Props) {
       unit: addUnit,
       notes: addNotes.trim() || undefined,
     });
+    hapticLight(settings.haptics ?? true);
     setAddName('');
     setAddQty('');
     setAddNotes('');

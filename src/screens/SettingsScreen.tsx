@@ -12,6 +12,7 @@ import { ThemeMode, useTheme } from '../context/ThemeContext';
 import { AccentColorPicker } from '../components/AccentColorPicker';
 import { useApp } from '../context/AppContext';
 import { exportViaShare, exportToDirectory, importAllData } from '../storage/exportImport';
+import { resetOnboardingDone } from '../storage/settings';
 import { RootStackParamList } from '../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
@@ -397,6 +398,15 @@ export function SettingsScreen({ navigation }: Props) {
             />
             <View style={{ height: 1, backgroundColor: theme.borderMuted, marginLeft: 66 }} />
             <SettingsRow
+              icon="zap"
+              label="Haptic Feedback"
+              subtitle="Vibration on check-off and key actions"
+              toggle
+              toggleValue={settings.haptics ?? true}
+              onToggle={(val) => updateSetting('haptics', val)}
+            />
+            <View style={{ height: 1, backgroundColor: theme.borderMuted, marginLeft: 66 }} />
+            <SettingsRow
               icon="type"
               label="Word Suggestions"
               subtitle="Words remembered from your items"
@@ -491,6 +501,17 @@ export function SettingsScreen({ navigation }: Props) {
             />
             <View style={{ height: 1, backgroundColor: theme.borderMuted, marginLeft: 66 }} />
             <SettingsRow
+              icon="book-open"
+              label="Walkthrough"
+              subtitle="See how Scribo works again"
+              chevron
+              onPress={async () => {
+                await resetOnboardingDone();
+                navigation.navigate('Onboarding');
+              }}
+            />
+            <View style={{ height: 1, backgroundColor: theme.borderMuted, marginLeft: 66 }} />
+            <SettingsRow
               icon="heart"
               label="Support Scribo"
               subtitle="Pay via UPI"
@@ -500,36 +521,6 @@ export function SettingsScreen({ navigation }: Props) {
           </View>
 
           {/* Neon accent preview */}
-          <View
-            style={{
-              marginHorizontal: 16,
-              marginTop: 24,
-              borderRadius: 14,
-              borderWidth: 1,
-              borderColor: theme.accentBorder,
-              backgroundColor: theme.accentDim,
-              padding: 16,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 12,
-            }}
-          >
-            <View
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: theme.accent,
-                shadowColor: theme.accent,
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 1,
-                shadowRadius: 6,
-              }}
-            />
-            <ThemedText size="sm" variant="accent" weight="medium" style={{ flex: 1 }}>
-              More features coming soon — stay tuned!
-            </ThemedText>
-          </View>
         </ScrollView>
       </SafeAreaView>
 
