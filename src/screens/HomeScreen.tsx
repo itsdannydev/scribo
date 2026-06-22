@@ -209,8 +209,8 @@ export function HomeScreen({ navigation, route }: Props) {
           {/* Row 1: logo + buttons */}
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
             <Image
-              source={require('../../assets/logo.png')}
-              style={{ height: 38, width: 38 }}
+              source={require('../../assets/logo_with_name.png')}
+              style={{ height: 44, width: 130, marginLeft: -20 }}
               resizeMode="contain"
               tintColor={theme.accent}
             />

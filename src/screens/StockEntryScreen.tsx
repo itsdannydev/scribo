@@ -345,7 +345,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
                       ref={qtyRef}
                       value={addQty}
                       onChangeText={setAddQty}
-                      placeholder="1"
+                      placeholder="Eg. 1"
                       placeholderTextColor={theme.textMuted}
                       keyboardType="decimal-pad"
                       style={{ flex: 1, color: theme.text, fontSize: 14, paddingVertical: 4 }}
@@ -401,7 +401,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
                     ref={notesRef}
                     value={addNotes}
                     onChangeText={setAddNotes}
-                    placeholder="Optional note"
+                    placeholder="Eg. Optional note"
                     placeholderTextColor={theme.textMuted}
                     style={{ flex: 1, color: theme.text, fontSize: 14, paddingVertical: 11 }}
                     returnKeyType="done"
@@ -471,7 +471,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
                         ref={nameRef}
                         value={addName}
                         onChangeText={setAddName}
-                        placeholder="Item name..."
+                        placeholder="Eg. Item name..."
                         placeholderTextColor={theme.textMuted}
                         underlineColorAndroid="transparent"
                         style={{ flex: 1, color: theme.text, fontSize: 15, height: 44 }}
@@ -524,7 +524,7 @@ export function StockEntryScreen({ navigation, route }: Props) {
                         ref={searchRef}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
-                        placeholder="Search items..."
+                        placeholder="Eg. Search items..."
                         placeholderTextColor={theme.textMuted}
                         underlineColorAndroid="transparent"
                         style={{ flex: 1, color: theme.text, fontSize: 15, height: 44 }}

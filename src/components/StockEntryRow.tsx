@@ -55,7 +55,7 @@ export function StockEntryRow({ item, quantity, unit, onQuantityChange, onUnitCh
             ref={inputRef}
             value={quantity}
             onChangeText={onQuantityChange}
-            placeholder={String(item.quantity)}
+            placeholder={`Eg: ${item.quantity}`}
             placeholderTextColor={theme.textMuted}
             keyboardType="decimal-pad"
             style={{ color: theme.text, fontSize: 14, padding: 0 }}
