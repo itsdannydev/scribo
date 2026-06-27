@@ -17,6 +17,15 @@
         "buildType": "apk"
       }
     },
+    "preview-arm64": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "BUILD_ABI": "arm64-v8a"
+      }
+    },
     "production": {
       "android": {
         "buildType": "app-bundle"
